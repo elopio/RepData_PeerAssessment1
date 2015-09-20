@@ -36,17 +36,14 @@ The variables included in this dataset are:
 
 The dataset is stored compressed in the file `activity.csv`.
 
-```{r setoptions,echo=FALSE,results="hide"}
-opts_chunk$set(echo=TRUE)
-options(scipen=999)
-Sys.setlocale("LC_ALL", 'en_US.UTF-8')
-```
+
 
 ## Loading and preprocessing the data
 
 Uncompress the file.
 
-```{r}
+
+```r
 if (!file.exists("activity.csv")) {
   unzip("activity.zip")
 }
@@ -54,48 +51,81 @@ if (!file.exists("activity.csv")) {
 
 Load the data into a table.
 
-```{r}
+
+```r
 data <- read.csv("activity.csv")
 head(data)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 summary(data$steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##       0       0       0      37      12     806    2304
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r}
+
+```r
 steps.per.day <- aggregate(steps~date, data, sum)
 hist(steps.per.day$steps, main="Histogram of steps per day", xlab="Steps")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 mean.steps.per.day <- mean(steps.per.day$steps)
 median.steps.per.day <- median(steps.per.day$steps)
 ```
 
 The total number of steps per day follows a normal distrubution, with mean
-`r mean.steps.per.day` and median `r median.steps.per.day`.
+10766.19 and median 10765.
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
 steps.per.interval <- aggregate(steps~interval, data, mean)
 with(steps.per.interval, plot(type="l", steps~interval))
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+```r
 max.steps.per.interval <- which.max(steps.per.interval$steps)
 ```
 
 The daily activity pattern average has a peak in the interval
-#`r max.steps.per.interval`.
+#104.
 
 ## Imputing missing values
 
-```{r}
+
+```r
 missing.steps <- table(is.na(data$steps))[2]
 ```
 
-The dataset is missing the number of steps from `r missing.steps` intervals.
+The dataset is missing the number of steps from 2304 intervals.
 
 The presence of missing days may introduce bias into some calculations or
 summaries of the data. We can fill the missing values with the mean for the
 other days on the same interval.
 
-```{r}
+
+```r
 # Code taken from http://stackoverflow.com/a/24030405.
 data.without.na <- data
 data.without.na$steps <- with(data, ifelse(
@@ -105,18 +135,29 @@ data.without.na$steps <- with(data, ifelse(
 summary(data.without.na$steps)
 ```
 
-```{r}
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0       0       0      37      27     806
+```
+
+
+```r
 steps.per.day.without.na <- aggregate(steps~date, data.without.na, sum)
 hist(steps.per.day.without.na$steps,
      main="Histogram of steps per day", xlab="Steps")
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
+```r
 mean.steps.per.day.without.na <- mean(steps.per.day.without.na$steps)
 median.steps.per.day.without.na <- median(steps.per.day.without.na$steps)
 ```
 
 By filling the missing values the total number of steps per day increases on
 the days that had missing values.
-The mean is `r mean.steps.per.day.without.na`, the same as the one on the
-dataset with missing values. The median `r median.steps.per.day.without.na`
+The mean is 10766.19, the same as the one on the
+dataset with missing values. The median 10766.19
 changed compared to the dataset with missing values .
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -124,7 +165,8 @@ changed compared to the dataset with missing values .
 There are differences in the mean of number of steps walked on weekdays and
 weekends.
 
-```{r}
+
+```r
 data.without.na$weekend <- weekdays(
   as.Date(data.without.na$date)) %in% c("Saturday", "Sunday")
 steps.per.interval.without.na <- aggregate(
@@ -137,3 +179,5 @@ with(steps.per.interval.without.na,
 legend("topright", c("weekdays", "weekend"),
        lty=c(1,1), col=c("blue", "red"))
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
